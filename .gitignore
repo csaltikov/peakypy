@@ -1,0 +1,9 @@
+*.so
+*.html
+/build/
+.idea/
+.DS_Store
+build
+/src/peakypy.egg-info/
+*__pycache__*
+*.DS_Store

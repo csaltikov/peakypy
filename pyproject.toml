@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=45"]
+build-backend = "setuptools.build_meta"
+
+[tool.cython]
+language_level = "3"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["*.pyx", "*.pxd"]
+
+[project]
+name = "peakypy"
+version = "0.1.0"
+description = "Finds peaks in HPLC ICPMS data"
+authors = [
+    {name = "Chad Saltikov", email = "saltikov@ucsc.edu"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.10"  # Adjust to the minimum supported version; avoid unreleased versions.
+dependencies = [
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "scipy",
+    "scikit-learn"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest"
+]
