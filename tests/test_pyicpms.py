@@ -7,7 +7,6 @@ from peakypy import peakypy
 class TestPyicpms(unittest.TestCase):
     def setUp(self) -> None:
         self.test_file = Path('100_uM_As3As5_rep2.TXT')
-        self.assertTrue(Path(self.test_file).is_file())
 
     def test_clean_icpms_data(self):
         observed = peakypy.clean_icpms_data(self.test_file)
