@@ -16,22 +16,23 @@ from sklearn.metrics import auc
 
 def get_auc(data_table, sample_name: str, plot=False, **kwargs) -> dict:
     """Detects peaks and calculates area under the peak for time vs cps HPLC ICPMS data"""
-    wlen: int = 110  # minimum width for a peak
-    threshold: int = 1000  # how many cps units higher than it's neighbors
-    return_fig: bool = False
+    wlen = kwargs.get('wlen', 10)  # minimum width for a peak
+    threshold = kwargs.get('threshold', 1000)  # how many cps units higher than it's neighbors
+    width = kwargs.get('width', (1,))
+    distance = kwargs.get('distance', 50)
+    prominence = kwargs.get('prominence', .5)
+    return_fig: bool = kwargs.get('return_fig', False)
 
-    for key, value in kwargs.items():
-        if "wlen" in key:
-            wlen = value
-        if "threshold" in key:
-            threshold = value
-        if "return_fig" in key:
-            return_fig = value
-
-    peaks, peak_info = find_peaks(data_table["cps"], distance=50, threshold=threshold, height=1, width=(3,))
+    peaks, peak_info = find_peaks(data_table["cps"],
+                                  height=1,
+                                  threshold=threshold,
+                                  distance=distance,
+                                  prominence=prominence,
+                                  width=width,
+                                  wlen=wlen)
 
     # further refine the peaks
-    results_full = peak_widths(x=data_table["cps"], peaks=peaks, rel_height=1, wlen=wlen)
+    results_full = peak_widths(x=data_table["cps"], peaks=peaks, rel_height=.999)
     widths, h_eval, left_ips, right_ips = results_full
 
     auc_info = defaultdict(float)
@@ -39,8 +40,8 @@ def get_auc(data_table, sample_name: str, plot=False, **kwargs) -> dict:
     auc_info["arsenite"] = 0
     auc_info["arsenate"] = 0
 
-    saved_peaks = dict(arsenite=[15, 25],
-                       arsenate=[90, 120])
+    saved_peaks = dict(arsenite=[15, 35],
+                       arsenate=[90, 160])
 
     sample_labels = []
 
@@ -165,12 +166,16 @@ if __name__ == "__main__":
 
     wlen = 40
     sample_auc = get_auc(sample_df, infile.name,
-                         plot=False,
-                         save_fig=False,
+                         plot=True,
+                         save_fig=True,
                          return_fig=True,
                          wlen=wlen)
 
     print(sample_auc)
+
+    ##%
+    fig, ax = sample_auc.get('fig'), sample_auc.get('ax')
+    plt.show()
 
     #%%
     # Make a standard curve and calcualte concentrations
