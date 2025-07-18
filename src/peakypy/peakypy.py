@@ -14,17 +14,17 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import auc
 
 
-def get_auc(data_table, sample_name: str, plot=False, **kwargs) -> dict:
+def get_auc(data_table, sample_name: str, prominence=0.9, plot=False, **kwargs) -> dict:
     """Detects peaks and calculates area under the peak for time vs cps HPLC ICPMS data"""
     wlen = kwargs.get('wlen', 10)  # minimum width for a peak
-    threshold = kwargs.get('threshold', 1000)  # how many cps units higher than it's neighbors
+    threshold = kwargs.get('threshold', 100)  # how many cps units higher than it's neighbors
     width = kwargs.get('width', (1,))
     distance = kwargs.get('distance', 50)
-    prominence = kwargs.get('prominence', .5)
+    height = kwargs.get('height', 1)
     return_fig: bool = kwargs.get('return_fig', False)
 
     peaks, peak_info = find_peaks(data_table["cps"],
-                                  height=1,
+                                  height=height,
                                   threshold=threshold,
                                   distance=distance,
                                   prominence=prominence,
@@ -32,7 +32,9 @@ def get_auc(data_table, sample_name: str, plot=False, **kwargs) -> dict:
                                   wlen=wlen)
 
     # further refine the peaks
-    results_full = peak_widths(x=data_table["cps"], peaks=peaks, rel_height=.999)
+    results_full = peak_widths(x=data_table["cps"],
+                               peaks=peaks,
+                               rel_height=prominence)
     widths, h_eval, left_ips, right_ips = results_full
 
     auc_info = defaultdict(float)
@@ -163,13 +165,9 @@ if __name__ == "__main__":
     infile = Path("100_uM_As3As5_rep2.TXT")
     sample_df = pd.read_csv(infile, sep="\t", skiprows=5, header=None).dropna(axis=1)
     sample_df.columns = ["time", "cps"]
-
+    ##%
     wlen = 40
-    sample_auc = get_auc(sample_df, infile.name,
-                         plot=True,
-                         save_fig=True,
-                         return_fig=True,
-                         wlen=wlen)
+    sample_auc = get_auc(sample_df, infile.name, prominence=0.9995, plot=True, wlen=wlen, return_fig=True)
 
     print(sample_auc)
 
