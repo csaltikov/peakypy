@@ -22,6 +22,7 @@ def get_auc(data_table, sample_name: str, prominence=0.9, plot=False, **kwargs) 
     distance = kwargs.get('distance', 50)
     height = kwargs.get('height', 1)
     return_fig: bool = kwargs.get('return_fig', False)
+    kwargs["prom"] = prominence
 
     peaks, peak_info = find_peaks(data_table["cps"],
                                   height=height,
@@ -95,7 +96,12 @@ def get_peak_baseline(time, cps, peaks: list):
 
 
 def plot_auc(table_data, peaks_coords: dict, **kwargs):
-    fig, ax = plt.subplots(figsize=(4,3))
+    figsize = kwargs.get('figsize', (4, 3))
+    yscale = kwargs.get('yscale', 'log')
+    save_fig = kwargs.get('save_fig', False)
+    return_fig = kwargs.get('return_fig', False)
+
+    fig, ax = plt.subplots(figsize=figsize)
     table_data.plot("time", "cps", ax=ax, style={"cps": "k-"}, linewidth= 0.5, legend=False)
     peak_colors = ["blue", "red", "green"]
 
@@ -114,7 +120,8 @@ def plot_auc(table_data, peaks_coords: dict, **kwargs):
             ax.set_title(val)
 
     ax.set_ylabel("cps")
-    ax.set_yscale("log")
+
+    ax.set_yscale(yscale)
 
     formatter = ticker.LogFormatterSciNotation(labelOnlyBase=True)
     formatter.labelOnlyBase = {'style': 'sci', 'useMathText': True}
@@ -123,8 +130,7 @@ def plot_auc(table_data, peaks_coords: dict, **kwargs):
     minor_x_locator = ticker.FixedLocator(range(25, 350, 25))
     ax.xaxis.set_minor_locator(minor_x_locator)
 
-    save_fig = kwargs.get('save_fig', False)
-    return_fig = kwargs.get('return_fig', False)
+
 
     for k,v in kwargs.items():
         print(f"{k}: {v}")
