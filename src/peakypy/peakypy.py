@@ -23,6 +23,10 @@ def get_auc(data_table, sample_name: str, prominence=0.9, plot=False, **kwargs) 
     height = kwargs.get('height', 1)
     return_fig: bool = kwargs.get('return_fig', False)
     kwargs["prom"] = prominence
+    # name of peaks and the range of indices
+    arsenic_peaks = dict(arsenite=[10, 30],
+                       arsenate=[45, 170])
+    target_peaks = kwargs.get('saved_peaks', arsenic_peaks)
 
     peaks, peak_info = find_peaks(data_table["cps"],
                                   height=height,
@@ -43,9 +47,6 @@ def get_auc(data_table, sample_name: str, prominence=0.9, plot=False, **kwargs) 
     auc_info["arsenite"] = 0
     auc_info["arsenate"] = 0
 
-    saved_peaks = dict(arsenite=[15, 35],
-                       arsenate=[90, 160])
-
     sample_labels = []
 
     peak_coordinates = defaultdict(dict)
@@ -62,7 +63,7 @@ def get_auc(data_table, sample_name: str, prominence=0.9, plot=False, **kwargs) 
         peak_auc = auc(x, y) - auc(x, y_base)
 
         # limit the peak areas to the ones I'm interested in
-        for key, [l_limit, r_limit] in saved_peaks.items():
+        for key, [l_limit, r_limit] in target_peaks.items():
             if l_limit < peaks[i] < r_limit:
                 auc_info[key] = peak_auc
                 peak_coordinates[key] = {"peak_id": peaks[i],
